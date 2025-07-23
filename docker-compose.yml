@@ -1,0 +1,299 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Database & Storage Layer
+  # ========================================
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: benchmark-postgres
+    environment:
+      POSTGRES_DB: hive_metastore
+      POSTGRES_USER: hive
+      POSTGRES_PASSWORD: hivepass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/configs/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hive -d hive_metastore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: benchmark-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console
+    volumes:
+      - minio_data:/data
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ========================================
+  # Hive Metastore
+  # ========================================
+  
+  hive-metastore:
+    image: apache/hive:4.0.0
+    container_name: benchmark-hive-metastore
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: "-Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/hive_metastore -Djavax.jdo.option.ConnectionUserName=hive -Djavax.jdo.option.ConnectionPassword=hivepass"
+    ports:
+      - "9083:9083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./infrastructure/configs/hive/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - ./infrastructure/lib/postgresql-42.7.2.jar:/opt/hive/lib/postgresql-42.7.2.jar
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD-SHELL", "netstat -an | grep 9083 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ========================================
+  # Query Engines
+  # ========================================
+  
+  trino:
+    image: trinodb/trino:432
+    container_name: benchmark-trino
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./infrastructure/configs/trino:/etc/trino
+    depends_on:
+      - hive-metastore
+      - minio
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  presto:
+    image: prestodb/presto:0.284
+    container_name: benchmark-presto
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./infrastructure/configs/presto:/opt/presto-server/etc
+    depends_on:
+      - hive-metastore
+      - minio
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/v1/info"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # starrocks-fe:
+  #   image: starrocks/fe-ubuntu:3.2-latest
+  #   container_name: benchmark-starrocks-fe
+  #   environment:
+  #     - FE_SERVERS=fe1:benchmark-starrocks-fe:9010
+  #   ports:
+  #     - "8030:8030"   # HTTP port
+  #     - "9020:9020"   # RPC port
+  #     - "9010:9010"   # Edit log port
+  #   volumes:
+  #     - starrocks_fe_data:/opt/starrocks/fe/meta
+  #   networks:
+  #     - benchmark-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8030/api/bootstrap"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 5
+
+  # starrocks-be:
+  #   image: starrocks/be-ubuntu:3.2-latest
+  #   container_name: benchmark-starrocks-be
+  #   environment:
+  #     - FE_SERVERS=benchmark-starrocks-fe:9010
+  #   ports:
+  #     - "8040:8040"   # HTTP port
+  #   volumes:
+  #     - starrocks_be_data:/opt/starrocks/be/storage
+  #   depends_on:
+  #     - starrocks-fe
+  #   networks:
+  #     - benchmark-network
+
+  # ========================================
+  # Backend Services
+  # ========================================
+  
+  benchmark-api:
+    build:
+      context: ./services/benchmark-api
+      dockerfile: Dockerfile
+    container_name: benchmark-api
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=hive
+      - DB_PASSWORD=hivepass
+      - DB_NAME=hive_metastore
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=admin
+      - MINIO_SECRET_KEY=password
+      - HIVE_METASTORE_URI=thrift://hive-metastore:9083
+      - TRINO_HOST=trino:8080
+      - PRESTO_HOST=presto:8080
+      - PROMETHEUS_URL=http://prometheus:9090
+    depends_on:
+      - postgres
+      - hive-metastore
+      - minio
+      - trino
+      - presto
+    volumes:
+      - ./infrastructure/configs/benchmark-api:/app/configs
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  query-service:
+    build:
+      context: ./services/query-service
+      dockerfile: Dockerfile
+    container_name: query-service
+    ports:
+      - "8083:8080"
+    environment:
+      - QUERY_SERVICE_PORT=8080
+      - TRINO_HOST=trino:8080
+      - PRESTO_HOST=presto:8080
+      - BENCHMARK_API_URL=http://benchmark-api:8080
+    depends_on:
+      - benchmark-api
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  metrics-service:
+    build:
+      context: ./services/metrics-service
+      dockerfile: Dockerfile
+    container_name: metrics-service
+    ports:
+      - "8084:8080"
+    environment:
+      - PROMETHEUS_URL=http://prometheus:9090
+      - BENCHMARK_API_URL=http://benchmark-api:8080
+    depends_on:
+      - prometheus
+      - benchmark-api
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ========================================
+  # Frontend
+  # ========================================
+  
+  web-ui:
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    container_name: benchmark-web-ui
+    ports:
+      - "3000:3000"
+    networks:
+      - benchmark-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========================================
+  # Monitoring Stack
+  # ========================================
+  
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: benchmark-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infrastructure/monitoring/prometheus/rules:/etc/prometheus/rules
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - benchmark-network
+
+  grafana:
+    image: grafana/grafana:10.1.0
+    container_name: benchmark-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - benchmark-network
+
+networks:
+  benchmark-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:

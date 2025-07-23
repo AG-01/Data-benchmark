@@ -1,0 +1,479 @@
+basePath: /api/v1
+definitions:
+  models.Benchmark:
+    properties:
+      created_at:
+        type: string
+      dataset_name:
+        type: string
+      dataset_size:
+        description: '"small", "medium", "large"'
+        type: string
+      description:
+        type: string
+      engines:
+        description: JSON array of engine names
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      queries:
+        description: Relationships
+        items:
+          $ref: '#/definitions/models.Query'
+        type: array
+      results:
+        items:
+          $ref: '#/definitions/models.Result'
+        type: array
+      status:
+        description: '"created", "running", "completed", "failed"'
+        type: string
+      table_format:
+        description: '"hive" or "iceberg"'
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Query:
+    properties:
+      benchmark:
+        allOf:
+        - $ref: '#/definitions/models.Benchmark'
+        description: Relationships
+      benchmark_id:
+        type: integer
+      complexity:
+        description: '"simple", "medium", "complex"'
+        type: string
+      created_at:
+        type: string
+      executions:
+        items:
+          $ref: '#/definitions/models.QueryExecution'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      query_type:
+        description: '"select", "aggregation", "join", "window"'
+        type: string
+      sql_query:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.QueryExecution:
+    properties:
+      bytes_processed:
+        type: integer
+      cpu_usage:
+        type: number
+      created_at:
+        type: string
+      end_time:
+        type: string
+      engine:
+        type: string
+      error_message:
+        type: string
+      execution_time_ms:
+        type: integer
+      id:
+        type: integer
+      io_read_bytes:
+        type: integer
+      io_write_bytes:
+        type: integer
+      memory_usage:
+        type: integer
+      query:
+        allOf:
+        - $ref: '#/definitions/models.Query'
+        description: Relationships
+      query_id:
+        type: integer
+      query_plan:
+        type: string
+      rows_processed:
+        type: integer
+      start_time:
+        type: string
+      status:
+        description: '"pending", "running", "completed", "failed"'
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.Result:
+    properties:
+      avg_cpu_usage:
+        type: number
+      avg_execution_time_ms:
+        type: number
+      avg_memory_usage:
+        type: number
+      benchmark:
+        allOf:
+        - $ref: '#/definitions/models.Benchmark'
+        description: Relationships
+      benchmark_id:
+        type: integer
+      created_at:
+        type: string
+      efficiency_score:
+        description: custom metric
+        type: number
+      engine:
+        type: string
+      failed_queries:
+        type: integer
+      id:
+        type: integer
+      max_execution_time_ms:
+        type: number
+      min_execution_time_ms:
+        type: number
+      successful_queries:
+        type: integer
+      table_format:
+        type: string
+      throughput:
+        description: queries per second
+        type: number
+      total_bytes_processed:
+        type: integer
+      total_io_read_bytes:
+        type: integer
+      total_io_write_bytes:
+        type: integer
+      total_queries:
+        type: integer
+      total_rows_processed:
+        type: integer
+      updated_at:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://www.example.com/support
+  description: API for benchmarking data lake table formats across multiple query
+    engines
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Data Lake Benchmark API
+  version: "1.0"
+paths:
+  /api/v1/benchmarks:
+    get:
+      description: Get a list of all benchmarks with optional filtering
+      parameters:
+      - description: Filter by status
+        in: query
+        name: status
+        type: string
+      - description: Filter by table format
+        in: query
+        name: table_format
+        type: string
+      - default: 20
+        description: Limit number of results
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Benchmark'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all benchmarks
+      tags:
+      - benchmarks
+    post:
+      consumes:
+      - application/json
+      description: Create a new benchmark configuration
+      parameters:
+      - description: Benchmark configuration
+        in: body
+        name: benchmark
+        required: true
+        schema:
+          $ref: '#/definitions/models.Benchmark'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Benchmark'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new benchmark
+      tags:
+      - benchmarks
+  /api/v1/benchmarks/{id}:
+    delete:
+      description: Delete a benchmark by ID
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a benchmark
+      tags:
+      - benchmarks
+    get:
+      description: Get a specific benchmark by its ID
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Benchmark'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get a benchmark by ID
+      tags:
+      - benchmarks
+    put:
+      consumes:
+      - application/json
+      description: Update an existing benchmark configuration
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated benchmark configuration
+        in: body
+        name: benchmark
+        required: true
+        schema:
+          $ref: '#/definitions/models.Benchmark'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Benchmark'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a benchmark
+      tags:
+      - benchmarks
+  /api/v1/benchmarks/{id}/results:
+    get:
+      description: Get aggregated results for a benchmark
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Result'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get benchmark results
+      tags:
+      - benchmarks
+  /api/v1/benchmarks/{id}/run:
+    post:
+      description: Start executing all queries in a benchmark across specified engines
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Run a benchmark
+      tags:
+      - benchmarks
+  /api/v1/benchmarks/{id}/status:
+    get:
+      description: Get the current status of a benchmark execution
+      parameters:
+      - description: Benchmark ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get benchmark status
+      tags:
+      - benchmarks
+  /health:
+    get:
+      description: Check if the service is healthy
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check endpoint
+      tags:
+      - health
+  /ready:
+    get:
+      description: Check if the service is ready to accept requests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "503":
+          description: Service Unavailable
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Readiness check endpoint
+      tags:
+      - health
+swagger: "2.0"

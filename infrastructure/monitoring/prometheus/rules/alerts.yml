@@ -1,0 +1,47 @@
+groups:
+  - name: benchmark_alerts
+    rules:
+      - alert: BenchmarkServiceDown
+        expr: up{job=~"benchmark-api|query-service|metrics-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Benchmark service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+      - alert: HighQueryExecutionTime
+        expr: benchmark_query_execution_duration_seconds > 300
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High query execution time detected"
+          description: "Query execution time is {{ $value }} seconds, which is above the threshold"
+
+      - alert: QueryFailureRate
+        expr: rate(benchmark_query_failures_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High query failure rate"
+          description: "Query failure rate is {{ $value }} failures per second"
+
+      - alert: EngineConnectionDown
+        expr: benchmark_engine_connection_status == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Engine {{ $labels.engine }} connection is down"
+          description: "Cannot connect to query engine {{ $labels.engine }}"
+
+      - alert: HighMemoryUsage
+        expr: (benchmark_memory_usage_bytes / benchmark_memory_total_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} which is above 90%"
