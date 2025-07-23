@@ -116,15 +116,6 @@ All services include health check endpoints:
 - All services use Docker networking for internal communication
 - Web UI proxies API calls through nginx for CORS handling
 
-## 🚀 Features
-
-- **Multi-Engine Support**: Benchmark queries across Trino, Presto, and StarRocks
-- **Table Format Comparison**: Compare Hive and Apache Iceberg performance
-- **Real-time Monitoring**: Prometheus metrics with Grafana dashboards
-- **Responsive Web UI**: Modern React interface for configuration and results
-- **Local Development**: Complete Docker-based setup, no cloud dependencies
-- **Microservices Architecture**: Clean separation of concerns with Go services
-- **Performance Analytics**: Detailed bottleneck identification and analysis
 
 ## 📁 Project Structure
 
@@ -216,43 +207,6 @@ data-benchmarks/
    cd web-ui && npm start
    ```
 
-## 📊 Benchmarking Workflow
-
-1. **Setup**: Configure table formats and datasets
-2. **Execute**: Run benchmark queries across engines
-3. **Monitor**: Real-time metrics collection
-4. **Analyze**: Compare performance results
-5. **Optimize**: Identify bottlenecks and tune configurations
-
-## 🔧 Configuration
-
-### Query Engines
-- Trino: `infrastructure/configs/trino/`
-- Presto: `infrastructure/configs/presto/`
-- StarRocks: `infrastructure/configs/starrocks/`
-
-### Table Formats
-- Hive: Traditional partitioned tables
-- Iceberg: Modern table format with time travel, schema evolution
-
-### Monitoring
-- Prometheus: `infrastructure/monitoring/prometheus/`
-- Grafana: `infrastructure/monitoring/grafana/`
-
-## 📈 Metrics & Analytics
-
-### Performance Metrics
-- Query execution time
-- Resource utilization (CPU, Memory, I/O)
-- Data scan efficiency
-- Parallelism effectiveness
-
-### Bottleneck Analysis
-- Engine-specific performance characteristics
-- Table format overhead comparison
-- Storage I/O patterns
-- Memory usage patterns
-
 ## 🧪 Testing
 
 ```bash
@@ -267,29 +221,3 @@ make test-metrics-service
 # Run frontend tests
 cd web-ui && npm test
 ```
-
-## 📝 API Documentation
-
-API documentation is available at:
-- Swagger UI: http://localhost:8080/swagger/
-- OpenAPI Spec: http://localhost:8080/api/v1/openapi.json
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Submit pull request
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Apache Iceberg community
-- Trino/Presto projects
-- StarRocks community
-- MinIO team
-- Prometheus & Grafana teams
