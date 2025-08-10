@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/sirupsen/logrus"
 	"benchmark-api/internal/config"
 	"benchmark-api/internal/repository"
+	"github.com/sirupsen/logrus"
 )
 
 type QueryService struct {

@@ -29,14 +29,14 @@ func (q *QueryExecutor) ExecuteTrinoQuery(ctx context.Context, query string) (*Q
 		"engine": "trino",
 		"query":  query,
 	}).Info("Executing Trino query")
-	
+
 	// TODO: Implement actual Trino query execution
 	return &QueryResult{
-		QueryID:     "trino-" + generateID(),
-		Status:      "completed",
-		Engine:      "trino",
+		QueryID:       "trino-" + generateID(),
+		Status:        "completed",
+		Engine:        "trino",
 		ExecutionTime: 1500,
-		RowsReturned: 100,
+		RowsReturned:  100,
 	}, nil
 }
 
@@ -45,14 +45,14 @@ func (q *QueryExecutor) ExecutePrestoQuery(ctx context.Context, query string) (*
 		"engine": "presto",
 		"query":  query,
 	}).Info("Executing Presto query")
-	
+
 	// TODO: Implement actual Presto query execution
 	return &QueryResult{
-		QueryID:     "presto-" + generateID(),
-		Status:      "completed",
-		Engine:      "presto",
+		QueryID:       "presto-" + generateID(),
+		Status:        "completed",
+		Engine:        "presto",
 		ExecutionTime: 1800,
-		RowsReturned: 100,
+		RowsReturned:  100,
 	}, nil
 }
 
@@ -60,19 +60,19 @@ func (q *QueryExecutor) ExecuteStarRocksQuery(ctx context.Context, query string)
 	if q.starrocksService == nil {
 		return nil, fmt.Errorf("StarRocks service not available")
 	}
-	
+
 	q.logger.WithFields(logrus.Fields{
 		"engine": "starrocks",
 		"query":  query,
 	}).Info("Executing StarRocks query")
-	
+
 	// TODO: Implement actual StarRocks query execution
 	return &QueryResult{
-		QueryID:     "starrocks-" + generateID(),
-		Status:      "completed",
-		Engine:      "starrocks",
+		QueryID:       "starrocks-" + generateID(),
+		Status:        "completed",
+		Engine:        "starrocks",
 		ExecutionTime: 1200,
-		RowsReturned: 100,
+		RowsReturned:  100,
 	}, nil
 }
 

@@ -14,7 +14,7 @@ var (
 		},
 		[]string{"method", "path", "status"},
 	)
-	
+
 	HTTPRequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "metrics_http_request_duration_seconds",

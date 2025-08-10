@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/sirupsen/logrus"
 	"benchmark-api/internal/repository"
+	"github.com/sirupsen/logrus"
 )
 
 type ResultService struct {

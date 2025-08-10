@@ -44,7 +44,7 @@ import (
 func main() {
 	// Initialize logger
 	logger := logger.New()
-	
+
 	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -56,7 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
-	
+
 	// Get underlying sql.DB to close properly
 	defer func() {
 		if sqlDB, err := db.DB(); err == nil {
@@ -123,13 +123,13 @@ func setupRouter(cfg *config.Config, benchmarkHandler *handlers.BenchmarkHandler
 	}
 
 	router := gin.New()
-	
+
 	// Middleware
 	router.Use(middleware.Logger())
 	router.Use(middleware.Recovery())
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Metrics())
-	
+
 	// CORS
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},

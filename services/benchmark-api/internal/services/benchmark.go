@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/sirupsen/logrus"
 	"benchmark-api/internal/models"
 	"benchmark-api/internal/repository"
+	"github.com/sirupsen/logrus"
 )
 
 type BenchmarkService struct {

@@ -65,7 +65,7 @@ func (h *BenchmarkHandler) CreateBenchmark(c *gin.Context) {
 // @Router /api/v1/benchmarks [get]
 func (h *BenchmarkHandler) ListBenchmarks(c *gin.Context) {
 	filters := make(map[string]interface{})
-	
+
 	if status := c.Query("status"); status != "" {
 		filters["status"] = status
 	}

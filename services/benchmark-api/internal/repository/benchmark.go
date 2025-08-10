@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"benchmark-api/internal/models"
+	"gorm.io/gorm"
 )
 
 type BenchmarkRepository struct {
@@ -26,11 +26,11 @@ func (r *BenchmarkRepository) GetByID(id uint) (*models.Benchmark, error) {
 func (r *BenchmarkRepository) List(filters map[string]interface{}, limit, offset int) ([]models.Benchmark, error) {
 	var benchmarks []models.Benchmark
 	query := r.db.Model(&models.Benchmark{})
-	
+
 	for key, value := range filters {
 		query = query.Where(key+" = ?", value)
 	}
-	
+
 	err := query.Limit(limit).Offset(offset).Find(&benchmarks).Error
 	return benchmarks, err
 }

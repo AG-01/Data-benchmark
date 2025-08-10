@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"net/http"
+	"benchmark-api/internal/services"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"benchmark-api/internal/services"
+	"net/http"
 )
 
 type QueryHandler struct {

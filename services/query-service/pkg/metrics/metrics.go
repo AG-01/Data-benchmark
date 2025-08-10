@@ -43,7 +43,7 @@ func RecordQueryExecution(engine, queryType string, duration float64, success bo
 	if !success {
 		status = "error"
 	}
-	
+
 	QueryExecutionDuration.WithLabelValues(engine, queryType).Observe(duration)
 	QueryExecutionCount.WithLabelValues(engine, status).Inc()
 }

@@ -14,7 +14,7 @@ var (
 		},
 		[]string{"method", "path", "status"},
 	)
-	
+
 	HTTPRequestDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "benchmark_http_request_duration_seconds",
@@ -23,7 +23,7 @@ var (
 		},
 		[]string{"method", "path"},
 	)
-	
+
 	// Benchmark metrics
 	BenchmarkExecutionsTotal = promauto.NewCounterVec(
 		prometheus.CounterOpts{
@@ -32,7 +32,7 @@ var (
 		},
 		[]string{"engine", "table_format", "status"},
 	)
-	
+
 	QueryExecutionDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "benchmark_query_execution_duration_seconds",
@@ -41,7 +41,7 @@ var (
 		},
 		[]string{"engine", "table_format", "query_type"},
 	)
-	
+
 	ActiveBenchmarks = promauto.NewGauge(
 		prometheus.GaugeOpts{
 			Name: "benchmark_active_benchmarks",
