@@ -1,9 +1,10 @@
 package services
 
 import (
-	"github.com/sirupsen/logrus"
 	"benchmark-api/internal/models"
 	"benchmark-api/internal/repository"
+
+	"github.com/sirupsen/logrus"
 )
 
 type BenchmarkService struct {
@@ -55,7 +56,7 @@ func (s *BenchmarkService) GetBenchmarkStatus(id uint) (map[string]interface{}, 
 	return status, nil
 }
 
-func (s *BenchmarkService) GetBenchmarkResults(id uint) ([]models.Result, error) {
+func (s *BenchmarkService) GetBenchmarkResults(_ uint) ([]models.Result, error) {
 	// TODO: Implement results retrieval logic
 	return []models.Result{}, nil
 }
