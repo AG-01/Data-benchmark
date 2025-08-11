@@ -22,21 +22,21 @@ func NewResultHandler(service *services.ResultService, logger *logrus.Logger) *R
 }
 
 // ListResults lists all results
-func (h *ResultHandler) ListResults(c *gin.Context) {
+func (*ResultHandler) ListResults(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
 // GetResult gets a result by ID
-func (h *ResultHandler) GetResult(c *gin.Context) {
+func (*ResultHandler) GetResult(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
 // CompareResults compares results
-func (h *ResultHandler) CompareResults(c *gin.Context) {
+func (*ResultHandler) CompareResults(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
 // GetAnalytics gets analytics data
-func (h *ResultHandler) GetAnalytics(c *gin.Context) {
+func (*ResultHandler) GetAnalytics(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }

@@ -1,10 +1,11 @@
 package handlers
 
 import (
+	"benchmark-api/internal/services"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"benchmark-api/internal/services"
 )
 
 type QueryHandler struct {
@@ -19,35 +20,35 @@ func NewQueryHandler(service *services.QueryService, logger *logrus.Logger) *Que
 	}
 }
 
-func (h *QueryHandler) CreateQuery(c *gin.Context) {
+func (*QueryHandler) CreateQuery(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) ListQueries(c *gin.Context) {
+func (*QueryHandler) ListQueries(c *gin.Context) {
 	c.JSON(http.StatusOK, []interface{}{})
 }
 
-func (h *QueryHandler) GetQuery(c *gin.Context) {
+func (*QueryHandler) GetQuery(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) UpdateQuery(c *gin.Context) {
+func (*QueryHandler) UpdateQuery(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) DeleteQuery(c *gin.Context) {
+func (*QueryHandler) DeleteQuery(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) ExecuteQuery(c *gin.Context) {
+func (*QueryHandler) ExecuteQuery(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) GetQueryResults(c *gin.Context) {
+func (*QueryHandler) GetQueryResults(c *gin.Context) {
 	c.JSON(http.StatusOK, []interface{}{})
 }
 
-func (h *QueryHandler) ListEngines(c *gin.Context) {
+func (*QueryHandler) ListEngines(c *gin.Context) {
 	engines := []map[string]interface{}{
 		{"name": "trino", "type": "trino", "status": "active"},
 		{"name": "presto", "type": "presto", "status": "active"},
@@ -56,7 +57,7 @@ func (h *QueryHandler) ListEngines(c *gin.Context) {
 	c.JSON(http.StatusOK, engines)
 }
 
-func (h *QueryHandler) GetEngineStatus(c *gin.Context) {
+func (*QueryHandler) GetEngineStatus(c *gin.Context) {
 	engine := c.Param("engine")
 	status := map[string]interface{}{
 		"engine": engine,
@@ -66,15 +67,15 @@ func (h *QueryHandler) GetEngineStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, status)
 }
 
-func (h *QueryHandler) ListTableFormats(c *gin.Context) {
+func (*QueryHandler) ListTableFormats(c *gin.Context) {
 	formats := []string{"hive", "iceberg"}
 	c.JSON(http.StatusOK, formats)
 }
 
-func (h *QueryHandler) CreateTable(c *gin.Context) {
+func (*QueryHandler) CreateTable(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }
 
-func (h *QueryHandler) GetTableInfo(c *gin.Context) {
+func (*QueryHandler) GetTableInfo(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"message": "Not implemented yet"})
 }

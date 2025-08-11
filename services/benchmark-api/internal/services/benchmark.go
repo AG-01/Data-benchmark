@@ -46,7 +46,7 @@ func (s *BenchmarkService) RunBenchmark(id uint) error {
 	return nil
 }
 
-func (s *BenchmarkService) GetBenchmarkStatus(id uint) (map[string]interface{}, error) {
+func (*BenchmarkService) GetBenchmarkStatus(id uint) (map[string]interface{}, error) {
 	// TODO: Implement status retrieval logic
 	status := map[string]interface{}{
 		"benchmark_id": id,
