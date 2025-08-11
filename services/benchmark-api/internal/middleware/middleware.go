@@ -1,13 +1,14 @@
 package middleware
 
 import (
-	"time"
-	"github.com/gin-gonic/gin"
 	"benchmark-api/pkg/metrics"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Logger() gin.HandlerFunc {
-	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+	return gin.LoggerWithFormatter(func(_ gin.LogFormatterParams) string {
 		return ""
 	})
 }
@@ -26,12 +27,12 @@ func RequestID() gin.HandlerFunc {
 func Metrics() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		
+
 		c.Next()
-		
+
 		duration := time.Since(start).Seconds()
 		status := string(rune(c.Writer.Status()))
-		
+
 		metrics.RecordHTTPRequest(c.Request.Method, c.FullPath(), status, duration)
 	}
 }

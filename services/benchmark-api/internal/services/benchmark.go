@@ -56,7 +56,7 @@ func (*BenchmarkService) GetBenchmarkStatus(id uint) (map[string]interface{}, er
 	return status, nil
 }
 
-func (*BenchmarkService) GetBenchmarkResults(id uint) ([]models.Result, error) {
+func (s *BenchmarkService) GetBenchmarkResults(_ uint) ([]models.Result, error) {
 	// TODO: Implement results retrieval logic
 	return []models.Result{}, nil
 }
